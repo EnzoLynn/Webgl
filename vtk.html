@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>VTK</title>
+    <script src="js/jquery.js"></script>
+    <script src="js/three.js"></script>
+    <script src="js/stats.min.js"></script>
+    <script type="text/javascript" src="js/dat.gui.min.js"></script>
+    <script type="text/javascript">
+    // data是从服务器传过来的数据，其实就是vtk文件中的文本数据 ，打开平【初级教程\chapter7A\models\vtk\bunny.vtk】看一下，你就知道是什么了？一定打开这个文件哦。
+    var parse = function(data) {
+        // new 一个几何体
+        var geometry = new THREE.Geometry();
+        // 定义一个内部函数vertex，用参数x,y,z生成一个顶点，并放入geometry的vertices数组中，
+        function vertex(x, y, z) {
+            geometry.vertices.push(new THREE.Vector3(x, y, z));
+        }
+
+        // 定义一个面索引函数face3，将面的3个点的索引放入geometry的faces数组中。
+        function face3(a, b, c) {
+            geometry.faces.push(new THREE.Face3(a, b, c));
+        }
+        // 定义一个面索引函数。如果一个面由4个顶点组成，那么我们构造一个Face4放入faces中，注意面可以由在同一平面的3个点组成，也可以由同一平面的4个顶点组成。
+        function face4(a, b, c, d) {
+            geometry.faces.push(new THREE.Face4(a, b, c, d));
+        }
+        // pattern存放模式字符串，result是临时变量
+        var pattern, result;
+
+        // float float float
+        // pattern是一个正则表达式，能够匹配3个空格隔开的float，如-0.0378297 0.12794 0.00447467都是pattern的菜。对正则表达式不了解，请一定补习一下哦。
+        pattern = /([\+|\-]?[\d]+[\.][\d|\-|e]+)[ ]+([\+|\-]?[\d]+[\.][\d|\-|e]+)[ ]+([\+|\-]?[\d]+[\.][\d|\-|e]+)/g;
+        // exec是正则表达式的执行匹配函数，result返回一个包含3个字符串的数组，如果data读到了最后，那么result将返回null
+        // while 循环在data中，寻找符合正则表示式的数据，将符合条件的数据，转换为一个顶点
+        while ((result = pattern.exec(data)) != null) {
+            // ["1.0 2.0 3.0", "1.0", "2.0", "3.0"]
+            // 将字符串转换为float，并放入geometry中
+            vertex(parseFloat(result[1]), parseFloat(result[2]), parseFloat(result[3]));
+        }
+
+        // 3 int int int
+        // 这里匹配面数据，如3 21216 21215 20399，这类数据是面索引数据
+        pattern = /3[ ]+([\d]+)[ ]+([\d]+)[ ]+([\d]+)/g;
+        // 取出data中的所有面索引数据，
+        while ((result = pattern.exec(data)) != null) {
+            // ["3 1 2 3", "1", "2", "3"]
+            // 将面数据放入geometry的faces中
+            face3(parseInt(result[1]), parseInt(result[2]), parseInt(result[3]));
+
+        }
+
+        // 4 int int int int
+        // 这里是4个顶点一个面的情况，本例的vtk文件，没有这种情况
+        pattern = /4[ ]+([\d]+)[ ]+([\d]+)[ ]+([\d]+)[ ]+([\d]+)/g;
+
+        while ((result = pattern.exec(data)) != null) {
+            // ["4 1 2 3 4", "1", "2", "3", "4"]
+            face4(parseInt(result[1]), parseInt(result[2]), parseInt(result[3]), parseInt(result[4]));
+
+        }
+
+        // 这里的4个函数，在后面解释 
+        geometry.computeFaceNormals();
+        geometry.computeVertexNormals();
+        geometry.computeBoundingSphere();
+
+        return geometry;
+
+    };
+
+
+
+    var container, stats, mesh,animating;
+    var camera, controls, scene, renderer;
+    var cross,gui,step;
+   
+
+
+    function init() {
+    	 container = document.getElementById('container');
+        camera = new THREE.PerspectiveCamera(60, container.offsetWidth / container.offsetHeight, 0.01, 1e10);
+        camera.position.z = 0.2;
+        controls = new function(){
+            this.rotationSpeed = 0.02;
+            this.bouncingSpedd = 0.03;
+        };
+        gui = new dat.GUI();
+        gui.add(controls,'rotationSpeed',0,0.5);
+        //gui.add(controls,'bouncingSpeed',0,0.5);
+       
+
+        scene = new THREE.Scene();
+        scene.add(camera);
+
+        // light
+        var dirLight = new THREE.DirectionalLight(0xffffff);
+        dirLight.position.set(200, 200, 1000).normalize();
+
+        camera.add(dirLight);
+        camera.add(dirLight.target);
+        // A begin
+        var material = new THREE.MeshLambertMaterial({
+            color: 0xffffff,
+            side: THREE.DoubleSide
+        });
+       
+        //   //这里调用api  http://localhost:911/threejs/examples/models/vtk/bunny.vtk
+        var url = "/threejs/examples/models/vtk/bunny.vtk";
+        var postdata = {};
+        $.ajax({
+            type: "get",
+            url: url,
+            data: postdata,
+            beforeSend: function(XMLHttpRequest) {},
+            success: function(data, textStatus) {
+
+                var geometry = parse(data);
+                mesh = new THREE.Mesh(geometry, material);
+                mesh.position.setY(-0.09);
+                scene.add(mesh);
+            },
+            complete: function(XMLHttpRequest, textStatus) {},
+            error: function() {}
+        });
+        // A end
+        // renderer
+        renderer = new THREE.WebGLRenderer({
+            antialias: false
+        });
+        renderer.setClearColor(0x000000, 1);
+        renderer.setSize(container.offsetWidth, container.offsetHeight);
+
+        //container = document.createElement('div');
+        //document.body.appendChild(container);
+        container.appendChild(renderer.domElement);
+
+        stats = new Stats();
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.top = '0px';
+        container.appendChild(stats.domElement);
+        //
+        window.addEventListener('resize', onWindowResize, false);
+    }
+
+    function onWindowResize() {
+        camera.aspect = container.offsetWidth / container.offsetHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.offsetWidth, container.offsetHeight);
+        //controls.handleResize();
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        if (animating) {
+            //mesh.rotation.x += 0.1;
+            mesh.rotation.y += controls.rotationSpeed;
+            //mesh.rotation.z += 0.1;
+            step+=controls.rotationSpeed;
+
+
+        };
+        renderer.render(scene, camera);
+        stats.update();
+    }
+
+    function mouseover() {
+        animating = true;
+    }
+
+    function mouseout() {
+        animating = false;
+    }
+    $(function() {
+        init();
+        animate();
+        $('#container').on({
+            mouseover: mouseover,
+            mouseout: mouseout
+        });
+    });
+    </script>
+</head>
+
+<body>
+
+  <div id="container" style="width:700px;height:500px;background-color:#000000">
+    </div>
+</body>
+
+</html>
