@@ -82,11 +82,13 @@ $(function() {
         })
     ];
     var mesh = new THREE.Mesh(geometry, meshMaterial);
+    mesh.translateY(15); 
+    mesh.castShadow = true;
     var cloned = mesh.geometry.clone();
     var meshMul = THREE.SceneUtils.createMultiMaterialObject(cloned, meshMaterials);
     scene.add(mesh);
-    meshMul.translateX(-5);
-    meshMul.translateZ(-5);
+    meshMul.translateX(-15);
+    meshMul.translateZ(-15);   
     scene.add(meshMul);
 
 
@@ -132,7 +134,7 @@ $(function() {
     spotLight.position.set(-10, 200,71);
     spotLight.castShadow = true;
     spotLight.target = plane;
-    spotLight.shadowCameraVisible = true;
+    //spotLight.shadowCameraVisible = true;
     scene.add(spotLight);
     spotLight.shadowCameraNear = 50;
     spotLight.shadowCameraFar = 300;
@@ -145,7 +147,7 @@ $(function() {
     directionalLight.position.set(-30, 10, -10);
     directionalLight.castShadow = true;
     directionalLight.target = plane;
-    directionalLight.shadowCameraVisible = true;
+    //directionalLight.shadowCameraVisible = true;
     scene.add(directionalLight);
     directionalLight.shadowCameraNear = 50;
     directionalLight.shadowCameraFar = 300;
@@ -214,9 +216,9 @@ $(function() {
     };
     gui.add(controlls, 'clone', "!#复制");
     var tempv = gui.addFolder('旋转控制');
-    tempv.add(controlls.rotation, 'x', 0.5 * Math.PI, 2 * Math.PI, "!#旋转");
-    tempv.add(controlls.rotation, 'y', 0.5 * Math.PI, 2 * Math.PI, "!#旋转");
-    tempv.add(controlls.rotation, 'z', 0.5 * Math.PI, 2 * Math.PI, "!#旋转");
+    tempv.add(controlls.rotation, 'x', 0.5 * Math.PI, 2 * Math.PI, "!#旋转x");
+    tempv.add(controlls.rotation, 'y', 0.5 * Math.PI, 2 * Math.PI, "!#旋转y");
+    tempv.add(controlls.rotation, 'z', 0.5 * Math.PI, 2 * Math.PI, "!#旋转z");
     gui.add(controlls, 'ambientLightColor', "!#环境光").onChange(function(e) {
         ambientLight.color = new THREE.Color(e);
     });
