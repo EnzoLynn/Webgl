@@ -90,7 +90,7 @@ $(function() {
             var cubeSize = Math.ceil((Math.random() * 3));
 
             var cubeGeometry = new THREE.SphereGeometry(cubeSize, 32, 32);
-            var cubeMaterial = new THREE.MeshBasicMaterial({
+            var cubeMaterial = new THREE.MeshLambertMaterial({
                 color: Math.random() * 0xffffff
             });
             var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);

@@ -84,6 +84,7 @@ $(function() {
     var mesh = new THREE.Mesh(geometry, meshMaterial);
     mesh.translateY(15); 
     mesh.castShadow = true;
+    mesh.id= "myobject";
     var cloned = mesh.geometry.clone();
     var meshMul = THREE.SceneUtils.createMultiMaterialObject(cloned, meshMaterials);
     scene.add(mesh);
