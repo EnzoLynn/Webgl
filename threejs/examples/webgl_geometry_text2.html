@@ -69,7 +69,8 @@
 		<script src="fonts/droid/droid_sans_bold.typeface.js"></script>
 		<script src="fonts/droid/droid_serif_regular.typeface.js"></script>
 		<script src="fonts/droid/droid_serif_bold.typeface.js"></script>
-
+		
+		<script src="fonts/lisu_regular.typeface.js"></script>
 		<!-- todo async loader for fonts -->
 
 
@@ -308,12 +309,16 @@
 
 						font = "droid serif";
 
-					} else {
+					}else if ( font == "droid serif" ) {
+
+						font = "LiSu";
+
+					}  else {
 
 						font = "helvetiker";
 
 					}
-
+					console.log(font);
 					refreshText();
 
 				}, false );
