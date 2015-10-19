@@ -113,15 +113,16 @@ $(function() {
             me.scene.add(mesh);
         },
         initText: function() {
-            var me = this;
-            var dynamicTexture = new THREEx.DynamicTexture(512, 512);
-            dynamicTexture.context.font = "bold 8px '宋体'";;
-            dynamicTexture.texture.anisotropy = me.renderer.getMaxAnisotropy();
+            var me = this,cube;
+            var dynamicTexture = new THREEx.DynamicTexture(100, 100);
+            //dynamicTexture.context.font = "bold 18px '宋体'";
+           // dynamicTexture.texture.anisotropy = me.renderer.getMaxAnisotropy();
             // update the text
             dynamicTexture.clear('cyan')
-                // dynamictexture.drawText('Hello', undefined, 256, 'red')
+           //dynamicTexture.drawText('的好', 20, 20, 'red')
             dynamicTexture.drawTextCooked({
                 text: '的字',
+                font:"bold 18px '宋体'",
                 lineHeight: 0.2,
             })
 
@@ -129,7 +130,7 @@ $(function() {
             var material = new THREE.MeshBasicMaterial({
                 map: dynamicTexture.texture
             });
-            var cube = new THREE.Mesh(geometry, material);
+            me.textCube =  cube = new THREE.Mesh(geometry, material);
             me.scene.add(cube);
 
         },
@@ -257,12 +258,13 @@ $(function() {
             sgControll.mesh.geometry.vertices = sgControll.vertices;
             sgControll.mesh.geometry.verticesNeedUpdate = true;
             sgControll.mesh.geometry.computeFaceNormals();
+            sgControll.textCube.rotation.y += 0.5;
             sgControll.mesh.rotation.x = guiControlls.rotation.x;
             sgControll.mesh.rotation.y = guiControlls.rotation.y;
             sgControll.mesh.rotation.z = guiControlls.rotation.z;
             sgControll.renderer.render(sgControll.scene, sgControll.camera);
         }
-        //render();
+        render();
 
 
 
