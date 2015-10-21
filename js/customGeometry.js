@@ -82,14 +82,14 @@ $(function() {
         })
     ];
     var mesh = new THREE.Mesh(geometry, meshMaterial);
-    mesh.translateY(15); 
+    mesh.translateY(15);
     mesh.castShadow = true;
-    mesh.id= "myobject";
+    mesh.id = "myobject";
     var cloned = mesh.geometry.clone();
     var meshMul = THREE.SceneUtils.createMultiMaterialObject(cloned, meshMaterials);
     scene.add(mesh);
     meshMul.translateX(-15);
-    meshMul.translateZ(-15);   
+    meshMul.translateZ(-15);
     scene.add(meshMul);
 
 
@@ -105,6 +105,15 @@ $(function() {
     cube.position.z = 13;
     cube.castShadow = true;
     scene.add(cube);
+
+
+    control = new THREE.TransformControls(camera, renderer.domElement);
+    //control.addEventListener('change', render); 
+    cube.addEventListener('click', function() {
+        console.log(123);
+    });
+    control.attach(cube);
+    scene.add(control);
     // var cubeShadow = new THREE.ShadowMesh(cube);
     // scene.add(cubeShadow);
     var cubeGeometry = new THREE.BoxGeometry(3, 3, 3);
@@ -118,6 +127,13 @@ $(function() {
     cube1.position.z = -3;
     cube1.castShadow = true;
     scene.add(cube1);
+
+
+    control = new THREE.TransformControls(camera, renderer.domElement);
+    control.addEventListener('change', render);
+    control.attach(cube1);
+    scene.add(control);
+
     //坐标体系辅助
     var axes = new THREE.AxisHelper(20);
     scene.add(axes);
@@ -132,7 +148,7 @@ $(function() {
     //聚光灯
     var spotLightColor = '#FF0404';
     var spotLight = new THREE.SpotLight(spotLightColor);
-    spotLight.position.set(-10, 200,71);
+    spotLight.position.set(-10, 200, 71);
     spotLight.castShadow = true;
     spotLight.target = plane;
     //spotLight.shadowCameraVisible = true;
@@ -142,7 +158,7 @@ $(function() {
     spotLight.shadowCameraFov = 30;
     // var cubeShadow = new THREE.ShadowMesh(cube1);
     // scene.add(cubeShadow);
-     //方向光
+    //方向光
     var directionalLightColor = '#0043FF';
     var directionalLight = new THREE.DirectionalLight(directionalLightColor);
     directionalLight.position.set(-30, 10, -10);
@@ -154,8 +170,8 @@ $(function() {
     directionalLight.shadowCameraFar = 300;
     directionalLight.shadowCameraFov = 30;
     //半球光
-    var hemiLight = new THREE.HemisphereLight('#0000ff','#00ff00',0.6);
-    hemiLight.position.set(0,500,0);
+    var hemiLight = new THREE.HemisphereLight('#0000ff', '#00ff00', 0.6);
+    hemiLight.position.set(0, 500, 0);
     scene.add(hemiLight);
 
     //添加clone
@@ -195,7 +211,7 @@ $(function() {
             intensity: 1
         },
         spotLight: {
-            color: spotLightColor 
+            color: spotLightColor
         }
     };
 
@@ -237,8 +253,18 @@ $(function() {
 
 
 
+    //构建反馈坐标系统
+    var mouse = new THREE.Vector2(),
+        INTERSECTED, raycaster;
+    raycaster = new THREE.Raycaster();
+    //鼠标到达
+    function onDocumentMouseDown(event) {
+        event.preventDefault();
 
-
+        mouse.x = (event.clientX / contanier.width()) * 2 - 1;
+        mouse.y = -(event.clientY / contanier.height()) * 2 + 1;
+    }
+    contanier.on("mousemove", onDocumentMouseDown);
     contanier.append(renderer.domElement);
     renderer.render(scene, camera);
 
@@ -251,6 +277,32 @@ $(function() {
         mesh.rotation.x = controlls.rotation.x;
         mesh.rotation.y = controlls.rotation.y;
         mesh.rotation.z = controlls.rotation.z;
+
+        //射线判断选中
+        raycaster.setFromCamera(mouse, camera);
+
+        var intersects = raycaster.intersectObjects(scene.children);
+
+        if (intersects.length > 0) {
+
+            if (INTERSECTED != intersects[0].object) {
+
+                if (INTERSECTED) INTERSECTED.material.color = INTERSECTED.currentHex;
+
+                INTERSECTED = intersects[0].object; 
+                INTERSECTED.currentHex = INTERSECTED.material.color;
+                var c = new THREE.Color( 0xff0000 );
+                INTERSECTED.material.color =c;
+
+            }
+
+        } else {
+
+            if (INTERSECTED) INTERSECTED.material.color = INTERSECTED.currentHex;
+
+            INTERSECTED = null;
+
+        }
         renderer.render(scene, camera);
     }
     render();
