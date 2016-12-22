@@ -2,7 +2,7 @@ $(function() {
 
     var contanier = $("#contanier");
     var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(45, contanier.width() / contanier.height(), 0.1, 1000);
+    var camera = new THREE.PerspectiveCamera(50, contanier.width() / contanier.height(), 0.1, 1000);
     //摄像机位置
     camera.position.set(-30, 40, 30);
     //camera.lookAt(scene.position);
@@ -259,10 +259,9 @@ $(function() {
     raycaster = new THREE.Raycaster();
     //鼠标到达
     function onDocumentMouseDown(event) {
-        event.preventDefault();
-
+        event.preventDefault(); 
         mouse.x = (event.clientX / contanier.width()) * 2 - 1;
-        mouse.y = -(event.clientY / contanier.height()) * 2 + 1;
+        mouse.y = -(event.clientY / contanier.height()) * 2 + 1; 
     }
     contanier.on("mousemove", onDocumentMouseDown);
     contanier.append(renderer.domElement);

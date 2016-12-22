@@ -25,7 +25,7 @@ Menubar.Examples = function ( editor ) {
 		{ title: 'Pong', file: 'pong.app.json' }
 	];
 
-	var loader = new THREE.XHRLoader();
+	var loader = new THREE.FileLoader();
 
 	for ( var i = 0; i < items.length; i ++ ) {
 
@@ -33,7 +33,7 @@ Menubar.Examples = function ( editor ) {
 
 			var item = items[ i ];
 
-			var option = new UI.Panel();
+			var option = new UI.Row();
 			option.setClass( 'option' );
 			option.setTextContent( item.title );
 			option.onClick( function () {
